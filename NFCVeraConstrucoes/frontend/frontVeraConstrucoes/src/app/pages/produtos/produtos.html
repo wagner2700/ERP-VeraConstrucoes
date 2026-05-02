@@ -1,0 +1,409 @@
+<div class="p-4 fadein animation-duration-500">
+  <div class="flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="m-0 text-900 font-bold">Cadastro de Produtos</h1>
+      <span class="text-500">Gerencie seu catalogo de materiais</span>
+    </div>
+    <div class="flex gap-2">
+      <p-button
+        label="Novo Produto"
+        icon="pi pi-plus"
+        severity="success"
+        (click)="novoProduto()"
+        [disabled]="carregando"
+      >
+      </p-button>
+      <p-button
+        label="Atualizar"
+        icon="pi pi-refresh"
+        severity="help"
+        (click)="atualizarLista()"
+        [disabled]="carregando"
+      >
+      </p-button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="carregando"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div class="text-center">
+      <p-progressSpinner></p-progressSpinner>
+      <p class="mt-4 text-white">Carregando...</p>
+    </div>
+  </div>
+
+  <div class="card shadow-1 border-round-xl bg-white p-3">
+    <div class="flex justify-content-between align-items-center mb-3">
+      <span class="text-500">
+        Total: {{ totalCount }} produto{{ totalCount !== 1 ? 's' : '' }} (Página
+        {{ currentPage }} de {{ totalPages }})
+      </span>
+      <span class="p-input-icon-left w-full md:w-20rem">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          placeholder="Pesquisar produto..."
+          class="w-full"
+          #searchInput
+          (input)="filtrarProdutos(searchInput.value)"
+        />
+      </span>
+    </div>
+
+    <p-table
+      [value]="searchInput.value.length > 0 ? produtosFiltrados : produtosPaginados"
+      [rows]="pageSize"
+      [paginator]="false"
+      [rowHover]="true"
+      responsiveLayout="scroll"
+      styleClass="p-datatable-striped"
+      [loading]="carregando"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 15%" pSortableColumn="id">Cod <p-sortIcon field="id"></p-sortIcon></th>
+          <th style="width: 40%" pSortableColumn="descricao">
+            Descricao <p-sortIcon field="descricao"></p-sortIcon>
+          </th>
+          <th style="width: 15%" pSortableColumn="valorUnitario">
+            Valor Unit. <p-sortIcon field="valorUnitario"></p-sortIcon>
+          </th>
+          <th style="width: 15%" pSortableColumn="estoque">
+            Estoque <p-sortIcon field="estoque"></p-sortIcon>
+          </th>
+          <th style="width: 15%">Acoes</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-prod>
+        <tr [ngClass]="{ 'highlight-row': prod.id === produto.id }">
+          <td>
+            <span class="font-bold text-primary">{{ prod.id }}</span>
+          </td>
+          <td>{{ prod.descricao }}</td>
+          <td>
+            <p-tag [value]="prod.valorUnitario" [severity]="getSeverityValor(prod.valorUnitario)">
+            </p-tag>
+          </td>
+          <td>
+            <p-tag [value]="prod.estoque + ' un'" [severity]="getSeverity(prod.estoque)"> </p-tag>
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                severity="info"
+                (click)="editarProduto(prod)"
+                [disabled]="carregando"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                (click)="excluirProduto(prod.id)"
+                [disabled]="carregando"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center p-4">
+            <div class="flex flex-column align-items-center">
+              <i class="pi pi-inbox text-4xl text-400 mb-2"></i>
+              <p class="text-500">Nenhum produto encontrado</p>
+              <p class="text-sm text-400">Clique em "Novo Produto" para adicionar um produto</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <!-- PAGINATOR MANUAL -->
+    <div class="flex justify-content-center mt-3" *ngIf="totalPages > 1">
+      <p-paginator
+        [first]="(currentPage - 1) * pageSize"
+        [rows]="pageSize"
+        [totalRecords]="totalCount"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} produtos"
+      ></p-paginator>
+    </div>
+  </div>
+
+  <p-drawer
+    [(visible)]="sidebarVisivel"
+    position="right"
+    [style]="{ width: '450px' }"
+    [closable]="false"
+    [blockScroll]="true"
+  >
+    <ng-template pTemplate="header">
+      <div class="flex justify-content-between align-items-center w-full">
+        <h3 class="font-bold text-xl m-0">
+          {{ produto.id === 0 ? 'Novo Produto' : 'Editar Produto' }}
+        </h3>
+        <button
+          pButton
+          icon="pi pi-times"
+          class="p-button-text p-button-rounded"
+          (click)="fecharSidebar()"
+          [disabled]="carregando"
+        ></button>
+      </div>
+    </ng-template>
+
+    <div class="field" *ngIf="produto.id !== 0">
+      <label for="id" class="font-bold block mb-2">Codigo</label>
+      <input pInputText id="id" [(ngModel)]="produto.id" readonly class="w-full bg-gray-100" />
+      <small class="text-500 block mt-1">Codigo gerado automaticamente</small>
+    </div>
+
+    <div class="flex flex-column gap-4 p-2 h-full">
+      <div class="field">
+        <label for="descricao" class="font-bold block mb-2">
+          Descricao <span class="text-red-500">*</span>
+        </label>
+        <input
+          pInputText
+          id="descricao"
+          [(ngModel)]="produto.descricao"
+          placeholder="Ex: Cimento CP II Votoran 50kg"
+          class="w-full"
+          required
+          maxlength="200"
+        />
+        <small class="text-500 block mt-1">Maximo 200 caracteres</small>
+      </div>
+
+      <div class="field">
+        <label for="valorUnitario" class="font-bold block mb-2">
+          Preco de Venda <span class="text-red-500">*</span>
+        </label>
+        <p-inputNumber
+          id="valorUnitario"
+          [(ngModel)]="produto.valorUnitario"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          [min]="0.01"
+          [step]="0.01"
+          class="w-full"
+          required
+        >
+        </p-inputNumber>
+      </div>
+
+      <div class="field">
+        <label for="estoque" class="font-bold block mb-2">Estoque</label>
+        <p-inputNumber
+          id="estoque"
+          [(ngModel)]="produto.estoque"
+          [min]="0"
+          [step]="1"
+          class="w-full"
+        >
+        </p-inputNumber>
+      </div>
+
+      <div class="field">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <label for="ncm" class="font-bold block m-0">
+            NCM <span class="text-red-500">*</span>
+          </label>
+          <p-button
+            label="Selecionar NCM"
+            icon="pi pi-search"
+            [text]="true"
+            size="small"
+            (click)="abrirModalNcm()"
+            [disabled]="carregando"
+          ></p-button>
+        </div>
+
+        <div class="flex gap-2 align-items-start">
+          <input
+            pInputText
+            id="ncm"
+            [(ngModel)]="produto.ncm"
+            placeholder="Selecione um NCM"
+            class="w-full"
+            readonly
+            required
+          />
+
+          <p-button
+            icon="pi pi-search"
+            severity="secondary"
+            (click)="abrirModalNcm()"
+            [disabled]="carregando"
+          ></p-button>
+
+          <p-button
+            *ngIf="produto.ncm"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (click)="limparNcm()"
+            [disabled]="carregando"
+          ></p-button>
+        </div>
+
+        <small class="text-500 block mt-2" *ngIf="!produto.ncm">
+          Pesquise por codigo, descricao ou CSOSN para vincular o NCM ao produto.
+        </small>
+
+        <small class="text-500 block mt-2" *ngIf="produto.ncm && !ncmSelecionado">
+          NCM selecionado: {{ produto.ncm }}
+        </small>
+
+        <small class="text-500 block mt-2" *ngIf="ncmSelecionado">
+          {{ ncmSelecionado!.descricao }} | CSOSN {{ ncmSelecionado!.csosn }}
+        </small>
+      </div>
+
+      <div class="flex flex-column gap-2 mt-auto">
+        <div class="flex gap-2">
+          <p-button
+            label="Cancelar"
+            severity="secondary"
+            [text]="true"
+            (click)="fecharSidebar()"
+            [disabled]="carregando"
+            class="flex-1"
+          >
+          </p-button>
+          <p-button
+            label="Salvar"
+            icon="pi pi-check"
+            (click)="salvar()"
+            [disabled]="
+              carregando || !produto.descricao || produto.valorUnitario <= 0 || !produto.ncm
+            "
+            severity="success"
+            class="flex-1"
+          >
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </p-drawer>
+
+  <p-dialog
+    [(visible)]="modalNcmVisivel"
+    header="Selecionar NCM"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '60rem', maxWidth: '95vw' }"
+    [breakpoints]="{ '960px': '95vw' }"
+    (onHide)="fecharModalNcm()"
+  >
+    <div class="flex flex-column gap-3">
+      <div class="flex justify-content-between align-items-center gap-3 flex-wrap">
+        <div>
+          <strong>Base fiscal disponivel</strong>
+          <p class="m-0 text-500">Escolha o NCM que sera associado ao produto em cadastro.</p>
+        </div>
+
+        <div class="flex gap-2 align-items-center w-full md:w-auto">
+          <span class="p-input-icon-left w-full md:w-20rem">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              placeholder="Buscar NCM, descricao ou CSOSN"
+              class="w-full"
+              #searchNcmInput
+              (input)="filtrarNcm(searchNcmInput.value)"
+            />
+          </span>
+
+          <p-button
+            icon="pi pi-refresh"
+            severity="secondary"
+            [outlined]="true"
+            (click)="atualizarNcm()"
+            [disabled]="carregandoNcm"
+          ></p-button>
+        </div>
+      </div>
+
+      <div
+        *ngIf="carregandoNcm"
+        class="border-1 border-300 border-round-lg p-4 flex align-items-center justify-content-center gap-3"
+      >
+        <p-progressSpinner
+          styleClass="w-3rem h-3rem"
+          strokeWidth="6"
+          fill="transparent"
+        ></p-progressSpinner>
+        <span class="text-600">Carregando lista de NCM...</span>
+      </div>
+
+      <p-table
+        [value]="ncmFiltrados"
+        [rows]="8"
+        [paginator]="true"
+        [rowHover]="true"
+        responsiveLayout="scroll"
+        styleClass="p-datatable-striped"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 18%">NCM</th>
+            <th>Descricao</th>
+            <th style="width: 16%">CSOSN</th>
+            <th style="width: 16%">Acao</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item>
+          <tr [ngClass]="{ 'surface-100': item.ncm === produto.ncm }">
+            <td>
+              <span class="font-bold">{{ item.ncm }}</span>
+            </td>
+            <td>{{ item.descricao }}</td>
+            <td>
+              <p-tag [value]="'CSOSN ' + item.csosn" [severity]="getSeverityCsosn(item.csosn)">
+              </p-tag>
+            </td>
+            <td>
+              <p-button
+                label="Selecionar"
+                icon="pi pi-check"
+                size="small"
+                severity="success"
+                (click)="selecionarNcm(item)"
+              ></p-button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="text-center p-4">
+              <div class="flex flex-column align-items-center gap-2">
+                <i class="pi pi-inbox text-3xl text-400"></i>
+                <strong>Nenhum NCM encontrado</strong>
+                <span class="text-500">
+                  Ajuste a busca ou confira se a tabela de NCM possui registros.
+                </span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-dialog>
+</div>

@@ -1,0 +1,298 @@
+<!-- configuracao.component.html -->
+<div class="container">
+  <div class="header">
+    <h1>Configurações da NFC-e</h1>
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="voltar()" type="button">Voltar</button>
+      <button class="btn btn-primary" (click)="salvar()" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar Configurações' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">Carregando configurações...</div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+  <form [formGroup]="configForm" (ngSubmit)="salvar()" *ngIf="!loading">
+    <!-- Seção: Certificado Digital -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Certificado Digital</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="caminhoCertificado">Caminho do Certificado (.pfx)</label>
+            <input type="text" id="caminhoCertificado" formControlName="caminhoCertificado"
+                   class="form-control" placeholder="C:\caminho\certificado.pfx">
+            <div *ngIf="configForm.get('caminhoCertificado')?.invalid && configForm.get('caminhoCertificado')?.touched" class="error">
+              Caminho obrigatório.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="senhaCertificado">Senha do Certificado</label>
+            <input type="password" id="senhaCertificado" formControlName="senhaCertificado"
+                   class="form-control" placeholder="Senha">
+            <div *ngIf="configForm.get('senhaCertificado')?.invalid && configForm.get('senhaCertificado')?.touched" class="error">
+              Senha obrigatória.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Série e Numeração -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Série e Numeração</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="serieNota">Série</label>
+            <input type="number" id="serieNota" formControlName="serieNota"
+                   class="form-control" min="1">
+            <div *ngIf="configForm.get('serieNota')?.invalid && configForm.get('serieNota')?.touched" class="error">
+              Série obrigatória (>=1).
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="ultimoNumeroNota">Último Número Utilizado</label>
+            <input type="number" id="ultimoNumeroNota" formControlName="ultimoNumeroNota"
+                   class="form-control" min="0">
+            <div *ngIf="configForm.get('ultimoNumeroNota')?.invalid && configForm.get('ultimoNumeroNota')?.touched" class="error">
+              Número obrigatório (>=0).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Dados do Emitente -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Dados do Emitente</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cnpjEmitente">CNPJ</label>
+            <input type="text" id="cnpjEmitente" formControlName="cnpjEmitente"
+                   class="form-control" placeholder="Apenas números" maxlength="14">
+            <div *ngIf="configForm.get('cnpjEmitente')?.invalid && configForm.get('cnpjEmitente')?.touched" class="error">
+              CNPJ obrigatório (14 números).
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="inscricaoEstadual">Inscrição Estadual</label>
+            <input type="text" id="inscricaoEstadual" formControlName="inscricaoEstadual"
+                   class="form-control">
+            <div *ngIf="configForm.get('inscricaoEstadual')?.invalid && configForm.get('inscricaoEstadual')?.touched" class="error">
+              IE obrigatória.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="razaoSocial">Razão Social</label>
+            <input type="text" id="razaoSocial" formControlName="razaoSocial"
+                   class="form-control">
+            <div *ngIf="configForm.get('razaoSocial')?.invalid && configForm.get('razaoSocial')?.touched" class="error">
+              Razão Social obrigatória.
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="nomeFantasia">Nome Fantasia</label>
+            <input type="text" id="nomeFantasia" formControlName="nomeFantasia"
+                   class="form-control">
+            <div *ngIf="configForm.get('nomeFantasia')?.invalid && configForm.get('nomeFantasia')?.touched" class="error">
+              Nome Fantasia obrigatório.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label type="number" for="regimeTributario">Regime Tributário</label>
+            <select type="number" id="regimeTributario" formControlName="regimeTributario" class="form-control">
+              <option  *ngFor="let r of regimes" [ngValue]="r.value">{{ r.label }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ambiente">Ambiente</label>
+            <select id="ambiente" formControlName="ambiente" class="form-control">
+              <option *ngFor="let a of ambientes" [ngValue]="a.value">{{ a.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Endereço do Emitente -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Endereço do Emitente</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="logradouroEmitente">Logradouro</label>
+            <input type="text" id="logradouroEmitente" formControlName="logradouroEmitente"
+                   class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="numeroEmitente">Número</label>
+            <input type="text" id="numeroEmitente" formControlName="numeroEmitente"
+                   class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="bairroEmitente">Bairro</label>
+            <input type="text" id="bairroEmitente" formControlName="bairroEmitente"
+                   class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="complementoEmitente">Complemento</label>
+            <input type="text" id="complementoEmitente" formControlName="complementoEmitente"
+                   class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="codigoMunicipioIBGE">Código IBGE do Município</label>
+            <input type="number" id="codigoMunicipioIBGE" formControlName="codigoMunicipioIBGE"
+                   class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="nomeMunicipio">Nome do Município</label>
+            <input type="text" id="nomeMunicipio" formControlName="nomeMunicipio"
+                   class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="uf">UF</label>
+            <input type="text" id="uf" formControlName="uf" class="form-control" maxlength="2">
+          </div>
+          <div class="form-group">
+            <label for="estado">Código UF (IBGE)</label>
+            <input type="number" id="estado" formControlName="estado" class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cep">CEP (somente números)</label>
+            <input type="text" id="cep" formControlName="cep" class="form-control" maxlength="8">
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone (somente números)</label>
+            <input type="text" id="telefone" formControlName="telefone" class="form-control" maxlength="11">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="unidadeFederativaCodigo">Código UF (redundante)</label>
+            <input type="number" id="unidadeFederativaCodigo" formControlName="unidadeFederativaCodigo"
+                   class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: CSC (Código de Segurança do Contribuinte) -->
+    <div class="card">
+      <div class="card-header">
+        <h2>CSC (Código de Segurança do Contribuinte)</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="idCSC">ID CSC</label>
+            <input type="text" id="idCSC" formControlName="idCSC" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="csc">CSC</label>
+            <input type="text" id="csc" formControlName="csc" class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Timeouts e Tentativas -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Timeouts e Tentativas</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="timeoutTransmissao">Timeout Transmissão (s)</label>
+            <input type="number" id="timeoutTransmissao" formControlName="timeoutTransmissao"
+                   class="form-control" min="1">
+          </div>
+          <div class="form-group">
+            <label for="tentativasConsultaRecibo">Tentativas de Consulta</label>
+            <input type="number" id="tentativasConsultaRecibo" formControlName="tentativasConsultaRecibo"
+                   class="form-control" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="intervaloConsultaRecibo">Intervalo entre Tentativas (ms)</label>
+            <input type="number" id="intervaloConsultaRecibo" formControlName="intervaloConsultaRecibo"
+                   class="form-control" min="500">
+          </div>
+          <div class="form-group">
+            <label for="versao">Versão do Leiaute</label>
+            <input type="number" id="versao" formControlName="versao" class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Pastas de Arquivos -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Pastas para Arquivos</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pastaXmlEnviados">XML Enviados</label>
+            <input type="text" id="pastaXmlEnviados" formControlName="pastaXmlEnviados"
+                   class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="pastaXmlAutorizados">XML Autorizados</label>
+            <input type="text" id="pastaXmlAutorizados" formControlName="pastaXmlAutorizados"
+                   class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pastaXmlCancelados">XML Cancelados</label>
+            <input type="text" id="pastaXmlCancelados" formControlName="pastaXmlCancelados"
+                   class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="pastaDanfes">DANFEs</label>
+            <input type="text" id="pastaDanfes" formControlName="pastaDanfes"
+                   class="form-control">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de ação (duplicado para mobile) -->
+    <div class="action-buttons">
+      <button class="btn btn-secondary" type="button" (click)="voltar()">Voltar</button>
+      <button class="btn btn-primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Salvando...' : 'Salvar Configurações' }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VeraConstrucoes.Communication\VeraConstrucoes.Communication\VeraConstrucoes.Communication.csproj" />
+    <ProjectReference Include="..\..\VeraConstrucoes.Domain\VeraConstrucoes.Domain\VeraConstrucoes.Domain.csproj" />
+    <ProjectReference Include="..\..\VeraConstrucoes.Exception\VeraConstrucoes.Exception\VeraConstrucoes.Exception.csproj" />
+    <ProjectReference Include="..\..\VeraConstrucoes.Infrastructure\VeraConstrucoes.Infrastructure\VeraConstrucoes.Infrastructure.csproj" />
+	  <None Update="Schemas\**\*">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+  </ItemGroup>
+
+</Project>

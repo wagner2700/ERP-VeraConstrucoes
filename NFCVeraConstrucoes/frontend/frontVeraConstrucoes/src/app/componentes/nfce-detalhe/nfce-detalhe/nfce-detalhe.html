@@ -1,0 +1,166 @@
+<!-- nfce-detalhe.component.html -->
+<div class="container" *ngIf="!loading && !error && nfceCompleta">
+  <!-- Cabeçalho com título e ações -->
+  <div class="header">
+    <h1>Detalhes da NFC-e</h1>
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="voltar()">Voltar</button>
+      <button class="btn btn-primary" *ngIf="nfceCompleta.pdfPath" (click)="imprimirDanfe()">
+        Imprimir DANFE
+      </button>
+    </div>
+  </div>
+
+  <!-- Informações resumidas da nota -->
+  <div class="nota-info">
+    <span class="badge" [class]="getSituacaoClasse(nfceCompleta.situacaoNota)">
+      {{ getSituacaoTexto(nfceCompleta.situacaoNota) }}
+    </span>
+    <span
+      ><strong>Nº:</strong> {{ nfceCompleta.numero }} | <strong>Série:</strong>
+      {{ nfceCompleta.serie }}</span
+    >
+    <span><strong>Emissão:</strong> {{ formatarData(nfceCompleta.dataEmissao) }}</span>
+    <span *ngIf="nfceCompleta.chaveAcesso"
+      ><strong>Chave:</strong> {{ nfceCompleta.chaveAcesso }}</span
+    >
+    <span *ngIf="nfceCompleta.protocolo"
+      ><strong>Protocolo:</strong> {{ nfceCompleta.protocolo }}</span
+    >
+  </div>
+
+  <!-- Cards principais -->
+  <div class="grid">
+    <!-- Cliente -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Cliente</h2>
+      </div>
+      <div class="card-body">
+        <p *ngIf="nfceCompleta.clienteNome">
+          <strong>Nome:</strong> {{ nfceCompleta.clienteNome }}
+        </p>
+        <p *ngIf="!nfceCompleta.clienteNome"><strong>Consumidor Não Identificado</strong></p>
+        <p *ngIf="nfceCompleta.clienteDocumento">
+          <strong>Documento:</strong> {{ nfceCompleta.clienteDocumento }}
+        </p>
+        <p *ngIf="nfceCompleta.clienteEmail">
+          <strong>E-mail:</strong> {{ nfceCompleta.clienteEmail }}
+        </p>
+        <p *ngIf="nfceCompleta.clienteTelefone">
+          <strong>Telefone:</strong> {{ nfceCompleta.clienteTelefone }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Produtos (lista) -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Produtos</h2>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descrição</th>
+              <th>Qtd</th>
+              <th>Un</th>
+              <th>Valor Unit.</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let prod of nfceCompleta.produtos">
+              <td>{{ prod.codigo }}</td>
+              <td>{{ prod.descricao }}</td>
+              <td>{{ prod.quantidade | number: '1.3-3' }}</td>
+              <td>{{ prod.unidade }}</td>
+              <td>{{ formatarMoeda(prod.valorUnitario) }}</td>
+              <td>{{ formatarMoeda(prod.quantidade * prod.valorUnitario) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Grid de duas colunas: Pagamento e Resumo Financeiro -->
+    <div class="grid-2">
+      <!-- Pagamento -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Pagamento</h2>
+        </div>
+        <div class="card-body">
+          <div *ngFor="let pag of nfceCompleta.pagamentos" class="pagamento-item">
+            <p><strong>Forma:</strong> {{ getMetodoPagamento(pag.metodo) }}</p>
+            <p><strong>Valor:</strong> {{ formatarMoeda(pag.valor) }}</p>
+            <p *ngIf="pag.parcelas"><strong>Parcelas:</strong> {{ pag.parcelas }}</p>
+            <p *ngIf="pag.troco"><strong>Troco:</strong> {{ formatarMoeda(pag.troco) }}</p>
+            <p *ngIf="pag.bandeira"><strong>Bandeira:</strong> {{ pag.bandeira }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo Financeiro -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Resumo Financeiro</h2>
+        </div>
+        <div class="card-body">
+          <p><strong>Total dos Produtos:</strong> {{ formatarMoeda(calcularTotalProdutos()) }}</p>
+          <p><strong>Descontos:</strong> {{ formatarMoeda(nfceCompleta.desconto || 0) }}</p>
+          <p><strong>Acréscimos:</strong> {{ formatarMoeda(nfceCompleta.acrescimo || 0) }}</p>
+          <hr />
+          <p class="total">
+            <strong>Valor Total:</strong> {{ formatarMoeda(nfceCompleta.valorTotal) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações e QR Code (opcionais) -->
+    <div class="grid-2" *ngIf="nfceCompleta.observacoes || nfceCompleta?.qrCodeUrl">
+      <div class="card" *ngIf="nfceCompleta.observacoes">
+        <div class="card-header">
+          <h2>Observações</h2>
+        </div>
+        <div class="card-body">
+          <p>{{ nfceCompleta.observacoes }}</p>
+        </div>
+      </div>
+      <div class="card" *ngIf="nfceCompleta?.qrCodeUrl">
+        <div class="card-header">
+          <h2>Links da nota fiscal</h2>
+        </div>
+        <div class="card-body">
+          <a *ngIf="nfceCompleta.qrCodeUrl" [href]="nfceCompleta.qrCodeUrl" target="_blank"
+            >Visualizar Nota</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Links para XML/PDF -->
+    <div class="card" *ngIf="nfceCompleta?.xmlPath || nfceCompleta?.pdfPath">
+      <div class="card-header">
+        <h2>Arquivos</h2>
+      </div>
+      <div class="card-body">
+        <a *ngIf="nfceCompleta.xmlPath" [href]="nfceCompleta.xmlPath" target="_blank"
+          >Visualizar XML</a
+        >
+        <a *ngIf="nfceCompleta.pdfPath" [href]="nfceCompleta.pdfPath" target="_blank"
+          >Download PDF</a
+        >
+      </div>
+    </div>
+    <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Estados de carregamento e erro -->
+<div class="loading" *ngIf="loading">Processando...</div>
+<div class="error" *ngIf="error">
+  Não foi possível carregar os dados. Tente novamente mais tarde.
+</div>

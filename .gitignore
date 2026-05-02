@@ -1,0 +1,59 @@
+# Visual Studio / IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.rsuser
+*.sln.docstates
+
+# .NET build artifacts
+bin/
+obj/
+Debug/
+Release/
+publish/
+TestResults/
+artifacts/
+*.cache
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Frontend / Node / Angular
+node_modules/
+dist/
+coverage/
+.angular/cache/
+.sass-cache/
+tmp/
+out-tsc/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Project-specific generated output
+XMLs_Console/
+
+# Frontend build copied into API wwwroot
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/3rdpartylicenses.txt
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/chunk-*.js
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/main-*.js
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/polyfills-*.js
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/styles-*.css
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/prerendered-routes.json
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/primeicons-*
+VeraConstrucoes/VeraConstrucoes.API/wwwroot/media/

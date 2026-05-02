@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ElectronNET.API" Version="23.6.2" />
+    <PackageReference Include="Hercules.NET.Nfe.Nfce" Version="2026.2.25.1745" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.35">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VeraConstrucoes.Application\VeraConstrucoes.Application\VeraConstrucoes.Application.csproj" />
+    <ProjectReference Include="..\VeraConstrucoes.Communication\VeraConstrucoes.Communication\VeraConstrucoes.Communication.csproj" />
+    <ProjectReference Include="..\VeraConstrucoes.Exception\VeraConstrucoes.Exception\VeraConstrucoes.Exception.csproj" />
+    <ProjectReference Include="..\VeraConstrucoes.Infrastructure\VeraConstrucoes.Infrastructure\VeraConstrucoes.Infrastructure.csproj" />
+	  <None Update="Schemas\**\*">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Schemas\PL_010b_NT2025_002_v1.30\DFeTiposBasicos_v1.00.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Schemas\PL_010b_NT2025_002_v1.30\leiauteNFe_v4.00.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Schemas\PL_010b_NT2025_002_v1.30\nfe_v4.00.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Schemas\PL_010b_NT2025_002_v1.30\tiposBasico_v4.00.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Schemas\PL_010b_NT2025_002_v1.30\xmldsig-core-schema_v1.01.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="electron.manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

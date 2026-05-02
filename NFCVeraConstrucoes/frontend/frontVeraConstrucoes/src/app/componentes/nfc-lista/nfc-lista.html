@@ -1,0 +1,104 @@
+<div class="container">
+  <div class="header">
+    <h1>Notas Fiscais Emitidas</h1>
+    <div class="actions">
+      <button class="btn btn-primary" (click)="novaNFCe()">Nova NFC-e</button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-card">
+    <div class="filtros-grid">
+      <div class="filtro-group">
+        <label>Número</label>
+        <input type="number" [(ngModel)]="filtros.numero" placeholder="Ex: 101">
+      </div>
+      <div class="filtro-group">
+        <label>Cliente (nome ou doc)</label>
+        <input type="text" [(ngModel)]="filtros.cliente" placeholder="Nome ou CPF/CNPJ">
+      </div>
+      <div class="filtro-group">
+        <label>Data início</label>
+        <input type="date" [(ngModel)]="filtros.dataInicio">
+      </div>
+      <div class="filtro-group">
+        <label>Data fim</label>
+        <input type="date" [(ngModel)]="filtros.dataFim">
+      </div>
+      <div class="filtro-group">
+        <label>Status</label>
+        <select [(ngModel)]="filtros.sucesso">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Autorizadas</option>
+          <option [ngValue]="false">Rejeitadas</option>
+        </select>
+      </div>
+      <div class="filtro-actions">
+        <button class="btn btn-secondary" (click)="aplicarFiltros()">Filtrar</button>
+        <button class="btn btn-outline" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de resultados -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Lista de NFC-e</h2>
+      <span class="total-registros" *ngIf="totalRegistros > 0">{{ totalRegistros }} registro(s) encontrado(s)</span>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="loading">Carregando...</div>
+      <div *ngIf="!loading && (!lista || lista.length === 0)" class="empty-state">
+        Nenhuma nota fiscal encontrada.
+      </div>
+      <table class="table" *ngIf="!loading && lista && lista.length > 0">
+        <thead>
+          <tr>
+            <th (click)="ordenarPor('numero')">Nº <span *ngIf="ordenacao.campo === 'numero'">{{ ordenacao.direcao === 'asc' ? '↑' : '↓' }}</span></th>
+            <th (click)="ordenarPor('serie')">Série</th>
+            <th (click)="ordenarPor('dataEmissao')">Emissão</th>
+            <th>Cliente</th>
+            <th (click)="ordenarPor('valorTotal')">Valor</th>
+            <th>Status</th>
+            <!-- <th>Chave de Acesso</th> -->
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let nf of lista">
+            <td>{{ nf.numero }}</td>
+            <td>{{ nf.serie }}</td>
+            <td>{{ formatarData(nf.dataEmissao) }}</td>
+            <td>
+              <span *ngIf="nf.clienteNome; else naoIdentificado">{{ nf.clienteNome }}</span>
+              <ng-template #naoIdentificado>Consumidor Não Identificado</ng-template>
+              <br><small *ngIf="nf.clienteDocumento">{{ nf.clienteDocumento }}</small>
+            </td>
+            <td>{{ formatarMoeda(nf.valorTotal) }}</td>
+            <td>
+              <span class="badge" [class.badge-success]="nf.statusProcessamento" [class.badge-danger]="!nf.statusProcessamento">
+                {{ nf.statusProcessamento ? 'Autorizada' : 'Rejeitada' }}
+              </span>
+            </td>
+            <!-- <td class="chave-cell">{{ nf.chaveAcesso || '-' }}</td> -->
+            <td class="actions-cell">
+              <button class="btn-icon" (click)="visualizar(nf.id)" title="Visualizar">
+                <span class="material-icons">Visualizar</span>
+              </button>
+              <!-- <button class="btn-icon" *ngIf="nf.pdfPath" (click)="imprimir(nf.pdfPath)" title="Imprimir DANFE">
+                <span class="material-icons">print</span>
+              </button> -->
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      <div class="pagination" *ngIf="totalRegistros > 0">
+        <button [disabled]="paginaAtual === 1" (click)="mudarPagina(paginaAtual - 1)">Anterior</button>
+        <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+        <button [disabled]="paginaAtual === totalPaginas" (click)="mudarPagina(paginaAtual + 1)">Próxima</button>
+      </div>
+    </div>
+  </div>
+</div>

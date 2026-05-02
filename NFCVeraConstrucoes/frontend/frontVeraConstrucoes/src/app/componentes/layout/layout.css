@@ -1,0 +1,102 @@
+/* Ocupa a tela toda e não deixa rolar a página inteira, só o conteúdo */
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- TOPO --- */
+.topbar {
+  height: 70px;
+  /* O Degradê Azul da Digimed */
+  background: linear-gradient(90deg, #0e1b36 0%, #1e40af 100%);
+  display: flex;
+  justify-content: space-between; /* Espalha itens (Esq <---> Dir) */
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 100; /* Garante que fique acima de tudo */
+}
+
+.logo {
+  color: white;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* --- CONTAINER PRINCIPAL (Menu + Conteúdo) --- */
+.main-container {
+  display: flex; /* Um ao lado do outro */
+  flex: 1; /* Ocupa altura restante */
+  overflow: hidden; /* Não cria barra de rolagem aqui */
+  background-color: #f3f4f6; /* Fundo cinza claro */
+}
+
+/* --- MENU LATERAL --- */
+.sidebar {
+  width: 260px;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  transition: width 0.3s ease; /* Animação suave de largura */
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+/* Quando fechado, diminui a largura */
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 25px;
+  color: #64748b; /* Cinza texto */
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-left: 4px solid transparent; /* Bordinha invisível na esquerda */
+  white-space: nowrap; /* Não quebra texto se menu diminuir */
+  cursor: pointer;
+}
+
+.menu-item i {
+  font-size: 1.2rem;
+  min-width: 30px; /* Garante espaço pro ícone */
+}
+
+/* Efeito ao passar o mouse */
+.menu-item:hover {
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+/* Item Ativo (Página Atual) */
+.active-item {
+  background-color: #eff6ff;
+  color: #1e40af; /* Azul Digimed */
+  border-left-color: #1e40af; /* A barrinha azul na esquerda */
+}
+
+/* --- ÁREA DE CONTEÚDO --- */
+.content-area {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto; /* Só rola essa parte se o conteúdo for grande */
+}
+
+/* Ajustes para celular */
+@media (max-width: 768px) {
+  .sidebar { position: absolute; height: 100%; z-index: 99; }
+  .sidebar.collapsed { width: 0; overflow: hidden; }
+  .hidden-mobile { display: none; }
+}

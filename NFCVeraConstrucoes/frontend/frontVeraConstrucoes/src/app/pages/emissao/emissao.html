@@ -1,0 +1,346 @@
+<!-- estrutura-geral.component.html -->
+<div class="nfce-emissao-container">
+  <!-- LAYOUT EM DUAS COLUNAS -->
+  <div class="content-wrapper">
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-content">
+      <!-- BARRA DE STATUS RÁPIDA -->
+      <div class="status-bar">
+        <div class="status-item">
+          <span class="status-label">Status SEFAZ:</span>
+          <span class="status-value" [ngClass]="statusSefazClass">
+            {{ statusSefaz }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ETAPAS DO PROCESSO (STEPPER) -->
+      <div class="stepper">
+        <div class="step" [class.active]="etapaAtual >= 1">
+          <div class="step-number">1</div>
+          <div class="step-label">Cliente</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" [class.active]="etapaAtual >= 2">
+          <div class="step-number">2</div>
+          <div class="step-label">Produtos</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" [class.active]="etapaAtual >= 3">
+          <div class="step-number">3</div>
+          <div class="step-label">Pagamento</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" [class.active]="etapaAtual >= 4">
+          <div class="step-number">4</div>
+          <div class="step-label">Revisão</div>
+        </div>
+      </div>
+
+      <!-- ETAPA 1: CLIENTE -->
+      <div *ngIf="etapaAtual === 1" class="etapa-cliente">
+        <h3>Informações do Cliente</h3>
+
+        <div class="tipo-cliente-options">
+          <button
+            class="btn-tipo"
+            [class.active]="tipoCliente === 'cpf'"
+            (click)="selecionarTipoCliente('cpf')"
+          >
+            👤 CPF (Pessoa Física)
+          </button>
+          <!-- <button
+            class="btn-tipo"
+            
+            [class.active]="tipoCliente === 'cnpj'"
+            (click)="selecionarTipoCliente('cnpj')"
+          >
+            🏢 CNPJ (Pessoa Jurídica)
+          </button> -->
+          <button
+            class="btn-tipo"
+            [class.active]="tipoCliente === 'anonimo'"
+            (click)="selecionarTipoCliente('anonimo')"
+          >
+            🕶️ Consumidor Não Identificado
+          </button>
+        </div>
+
+        <form [formGroup]="clienteForm" class="form-cliente">
+          <div *ngIf="tipoCliente !== 'anonimo'" class="form-group">
+            <label>{{ tipoCliente === 'cpf' ? 'CPF' : 'CNPJ' }}</label>
+            <input
+              type="text"
+              [mask]="tipoCliente === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'"
+              formControlName="documento"
+              placeholder="Digite o documento"
+            />
+            <button type="button" class="btn-busca" (click)="buscarCliente()">🔍 Consultar</button>
+            <!-- Mensagens de erro -->
+            <div
+              *ngIf="clienteForm.get('documento')?.invalid && clienteForm.get('documento')?.touched"
+              class="error-message"
+            >
+              <span *ngIf="clienteForm.get('documento')?.errors?.['required']">
+                {{ tipoCliente === 'cpf' ? 'CPF' : 'CNPJ' }} é obrigatório.
+              </span>
+              <span *ngIf="clienteForm.get('documento')?.errors?.['minlength']">
+                {{ tipoCliente === 'cpf' ? 'CPF' : 'CNPJ' }} inválido.
+              </span>
+              <span *ngIf="clienteForm.get('documento')?.errors?.['cpfInvalido']">
+                CPF inválido.
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="tipoCliente !== 'anonimo'" class="form-group">
+            <label>Nome / Razão Social</label>
+            <input type="text" formControlName="nome" placeholder="Nome completo" />
+            <span *ngIf="clienteForm.get('nome')?.errors?.['required']">
+              Nome é obrigatório para cliente identificado.
+            </span>
+          </div>
+
+          <div *ngIf="tipoCliente !== 'anonimo'" class="form-row">
+            <div class="form-group">
+              <label>E-mail</label>
+              <input type="email" formControlName="email" placeholder="exemplo@email.com" />
+            </div>
+            <div class="form-group">
+              <label>Telefone</label>
+              <input type="tel" mask="(00) 00000-0000" formControlName="telefone" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ETAPA 2: PRODUTOS -->
+      <div *ngIf="etapaAtual === 2" class="etapa-produtos">
+        <h3>Adicionar Produtos</h3>
+
+        <div class="busca-produto">
+          <input
+            type="text"
+            placeholder="🔍 Digite código ou nome do produto"
+            [(ngModel)]="termoBusca"
+            (keyup.enter)="buscarProdutos()"
+          />
+          <button class="btn-primary" (click)="buscarProdutos()">Buscar</button>
+          <button class="btn-secondary" (click)="abrirCatalogo()">📦 Ver Catálogo</button>
+        </div>
+
+        <!-- LISTA DE PRODUTOS -->
+        <div class="produtos-grid">
+          <div *ngFor="let produto of produtosFiltrados" class="produto-card">
+            <div class="produto-info">
+              <span class="produto-cod">{{ produto.id }}</span>
+              <h4>{{ produto.descricao }}</h4>
+              <div class="produto-detalhes">
+                <span class="valor">R$ {{ produto.valorUnitario | number: '1.2-2' }}</span>
+                <span class="estoque">Estoque: {{ produto.estoque }} un</span>
+              </div>
+            </div>
+            <div class="produto-acao">
+              <div class="quantidade-control">
+                <button (click)="diminuirQuantidade(produto)">-</button>
+                <input
+                  type="number"
+                  [(ngModel)]="produto.quantidade"
+                  min="1"
+                  [max]="produto.estoque"
+                />
+                <button (click)="aumentarQuantidade(produto)">+</button>
+              </div>
+              <button
+                class="btn-adicionar"
+                (click)="adicionarAoCarrinho(produto)"
+                [disabled]="produto.quantidade > produto.estoque"
+              >
+                {{ produto.noCarrinho ? '✓ Adicionado' : '➕ Adicionar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGINAÇÃO -->
+        <div class="flex justify-content-center mt-3" *ngIf="totalPages > 1">
+          <p-paginator
+            [first]="(currentPage - 1) * pageSize"
+            [rows]="pageSize"
+            [totalRecords]="totalCount"
+            [rowsPerPageOptions]="[4, 10, 20]"
+            (onPageChange)="onPageChangeProdutos($event)"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} produtos"
+          ></p-paginator>
+        </div>
+
+        <!-- CARRINHO -->
+        <div class="carrinho-section">
+          <h4>Itens da Venda ({{ carrinho.length }})</h4>
+          <div class="carrinho-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cod</th>
+                  <th>Descrição</th>
+                  <th>Qtd</th>
+                  <th>Valor Unit.</th>
+                  <th>Total</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of carrinho; let i = index">
+                  <td>{{ item.id }}</td>
+                  <td>{{ item.descricao }}</td>
+                  <td>
+                    <input
+                      type="number"
+                      [(ngModel)]="item.quantidade"
+                      min="1"
+                      (change)="atualizarTotalItem(i)"
+                    />
+                  </td>
+                  <td>R$ {{ item.valorUnitario | number: '1.2-2' }}</td>
+                  <td>R$ {{ item.total | number: '1.2-2' }}</td>
+                  <td>
+                    <button class="btn-remover" (click)="removerDoCarrinho(i)">❌</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="resumo-carrinho">
+            <div class="resumo-item">
+              <span>Subtotal:</span>
+              <span>R$ {{ subtotal | number: '1.2-2' }}</span>
+            </div>
+            <div class="resumo-item">
+              <span>Descontos:</span>
+              <span>- R$ {{ desconto | number: '1.2-2' }}</span>
+            </div>
+            <div class="resumo-item total">
+              <span>Total:</span>
+              <span>R$ {{ total | number: '1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ETAPA 3: PAGAMENTO -->
+      <div *ngIf="etapaAtual === 3" class="etapa-pagamento">
+        <h3>Forma de Pagamento</h3>
+
+        <div class="metodos-pagamento">
+          <div
+            class="metodo-card"
+            *ngFor="let metodo of metodosPagamento"
+            [class.selecionado]="metodoSelecionado === metodo.id"
+            (click)="selecionarMetodo(metodo.id)"
+          >
+            <div class="metodo-icon">{{ metodo.icone }}</div>
+            <div class="metodo-info">
+              <h4>{{ metodo.nome }}</h4>
+              <p>{{ metodo.descricao }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="metodoSelecionado" class="detalhes-pagamento">
+          <div class="form-group">
+            <label>Valor</label>
+            <input type="number" [(ngModel)]="valorPagamento" [max]="total" step="0.01" />
+          </div>
+
+          <div *ngIf="metodoSelecionado === 'credito'" class="parcelamento">
+            <label>Parcelas</label>
+            <select [(ngModel)]="parcelas">
+              <option *ngFor="let p of [1, 2, 3, 4, 5, 6]" [value]="p">
+                {{ p }}x de R$ {{ valorPagamento / p | number: '1.2-2' }}
+              </option>
+            </select>
+          </div>
+
+          <div class="troco-section" *ngIf="metodoSelecionado === 'dinheiro'">
+            <label>Valor Recebido</label>
+            <input type="number" [(ngModel)]="valorRecebido" (input)="calcularTroco()" />
+            <div *ngIf="troco > 0" class="troco-info">Troco: R$ {{ troco | number: '1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ETAPA 4: REVISÃO -->
+      <div *ngIf="etapaAtual === 4" class="etapa-revisao">
+        <h3>Revisão da NFC-e</h3>
+
+        <div class="revisao-card">
+          <h4>Cliente</h4>
+          <p>{{ clienteForm.value.nome || 'Consumidor Não Identificado' }}</p>
+          <p *ngIf="clienteForm.value.documento">
+            {{ tipoCliente === 'cpf' ? 'CPF' : 'CNPJ' }}: {{ clienteForm.value.documento }}
+          </p>
+        </div>
+
+        <div class="revisao-card">
+          <h4>Produtos</h4>
+          <ul>
+            <li *ngFor="let item of carrinho">
+              {{ item.quantidade }}x {{ item.descricao }} - R$ {{ item.total | number: '1.2-2' }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="revisao-card">
+          <h4>Pagamento</h4>
+          <p>Forma: {{ getMetodoPagamentoNome() }}</p>
+          <p>Valor: R$ {{ valorPagamento | number: '1.2-2' }}</p>
+          <p *ngIf="troco > 0">Troco: R$ {{ troco | number: '1.2-2' }}</p>
+        </div>
+
+        <div class="resumo-final">
+          <h4>Resumo Financeiro</h4>
+          <div class="resumo-item">
+            <span>Total dos Produtos:</span>
+            <span>R$ {{ subtotal | number: '1.2-2' }}</span>
+          </div>
+          <div class="resumo-item">
+            <span>Descontos:</span>
+            <span>R$ {{ desconto | number: '1.2-2' }}</span>
+          </div>
+          <div class="resumo-item total">
+            <span>Valor Total:</span>
+            <span>R$ {{ total | number: '1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÕES DE NAVEGAÇÃO -->
+      <div class="acao-buttons">
+        <button class="btn-secondary" (click)="etapaAnterior()" [disabled]="etapaAtual === 1">
+          ⏮️ Voltar
+        </button>
+
+        <button class="btn-primary" (click)="proximaEtapa()" *ngIf="etapaAtual < 4">
+          {{ etapaAtual === 3 ? 'Revisar' : 'Continuar' }} ⏭️
+        </button>
+
+        <button
+          class="btn-success"
+          (click)="emitirNFCe()"
+          *ngIf="etapaAtual === 4"
+          [disabled]="emitindo"
+        >
+          <span *ngIf="!emitindo"> 🧾 Emitir NFC-e </span>
+          <span *ngIf="emitindo" class="btn-spinner-content">
+            <span class="spinner"></span>
+            Emitindo...
+          </span>
+        </button>
+      </div>
+    </div>
+    <!-- FIM MAIN CONTENT -->
+  </div>
+  <!-- FIM CONTENT WRAPPER -->
+</div>

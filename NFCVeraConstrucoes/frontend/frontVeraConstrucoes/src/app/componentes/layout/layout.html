@@ -1,0 +1,51 @@
+<div class="layout-wrapper">
+  
+  <!-- 1. TOPO (HEADER) -->
+  <!-- Aquele azul degradê da imagem -->
+  <header class="topbar">
+    <div class="flex align-items-center gap-3">
+      <!-- Botão Hamburger (Menu) -->
+      <button pButton icon="pi pi-bars" (click)="toggleSidebar()" class="p-button-text text-white"></button>
+      <h2 class="logo">Vera Construções</h2>
+    </div>
+
+    <!-- Área do Usuário (Direita) -->
+    <div class="user-area flex align-items-center gap-3">
+      <!-- Ícone de notificação com número -->
+      <i class="pi pi-bell p-overlay-badge" style="font-size: 1.2rem; color: white; cursor: pointer;">
+        <p-badge value="4" severity="danger"></p-badge>
+      </i>
+      
+      <!-- Avatar do Usuário -->
+      <div class="flex align-items-center gap-2 cursor-pointer">
+        <span class="text-white font-bold hidden-mobile">Wagner</span>
+        <p-avatar icon="pi pi-user" shape="circle" styleClass="bg-white text-primary"></p-avatar>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. CORPO (MENU + CONTEÚDO) -->
+  <div class="main-container">
+    
+    <!-- MENU LATERAL (SIDEBAR) -->
+    <!-- [class.collapsed] é um truque do Angular: adiciona a classe CSS se a variável for false -->
+    <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+      <ul class="menu-list">
+        <li *ngFor="let item of menuItems">
+          <!-- routerLinkActive="active" -> O Angular aplica a classe .active se for a página atual -->
+          <a [routerLink]="item.link" routerLinkActive="active-item" class="menu-item">
+            <i [class]="item.icon"></i>
+            <span *ngIf="sidebarOpen">{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL (ONDE AS TELAS MUDAM) -->
+    <main class="content-area">
+      <!-- Aqui entra a tela de Emissão, Dashboard, etc -->
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>
