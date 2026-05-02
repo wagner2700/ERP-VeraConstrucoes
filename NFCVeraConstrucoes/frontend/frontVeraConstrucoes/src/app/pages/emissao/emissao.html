@@ -123,9 +123,9 @@
             type="text"
             placeholder="🔍 Digite código ou nome do produto"
             [(ngModel)]="termoBusca"
-            (keyup.enter)="buscarProdutos()"
+            (keyup.enter)="buscarProduto()"
           />
-          <button class="btn-primary" (click)="buscarProdutos()">Buscar</button>
+          <button class="btn-primary" (click)="buscarProduto()">Buscar</button>
           <button class="btn-secondary" (click)="abrirCatalogo()">📦 Ver Catálogo</button>
         </div>
 
@@ -344,3 +344,4 @@
   </div>
   <!-- FIM CONTENT WRAPPER -->
 </div>
+

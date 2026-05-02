@@ -156,7 +156,7 @@ export class Emissao implements OnInit {
     });
   }
 
-  buscarProdutos() {
+  buscarProduto() {
     if (this.termoBusca.trim() === '') {
       this.produtosFiltrados = [...this.produtosPaginados];
     } else {

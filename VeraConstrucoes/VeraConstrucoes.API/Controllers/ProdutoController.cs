@@ -64,11 +64,14 @@ namespace VeraConstrucoes.API.Controllers
         /// <param name="descricao">Descrição do produto (opcional)</param>
         /// <returns>Lista de produtos encontrados</returns>
         [HttpPost("buscar")]
-        public async Task<ActionResult<List<ResponseRegisterProduct>>> BuscarProdutos([FromBody] string termoBusca , [FromServices] IGetAllProductUseCase useCase)
+        public async Task<ActionResult<List<ResponseRegisterProduct>>> BuscarProdutos([FromBody] RequestBuscarProdutoJson request , [FromServices] IGetAllProductUseCase useCase)
         {
             try
             {
-                var resultado = await useCase.ObterProdutoDescritivoOuCodigo(termoBusca);
+                if (request is null || string.IsNullOrWhiteSpace(request.TermoBusca))
+                    return BadRequest(new { erro = "Informe um termo para busca." });
+
+                var resultado = await useCase.ObterProdutoDescritivoOuCodigo(request.TermoBusca);
                 return Ok(resultado);
             }
             catch (ArgumentException ex)

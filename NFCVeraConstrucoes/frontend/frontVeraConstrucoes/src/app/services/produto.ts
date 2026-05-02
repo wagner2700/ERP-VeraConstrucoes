@@ -28,7 +28,9 @@ export class Produto {
   }
 
   BuscarProdutoPorDescritivoOuCodigo(termo: string): Observable<ProdutoNFCe[]> {
-    return this.http.post<ProdutoNFCe[]>(`${this.apiUrl}/buscar`, termo);
+    console.log(`🔍 Buscando produtos com termo: "${termo}"`);
+    console.log(`📡 Enviando requisição para: ${this.apiUrl}/buscar`);
+    return this.http.post<ProdutoNFCe[]>(`${this.apiUrl}/buscar`, { termoBusca: termo });
   }
 
   private carregarProdutosIniciais(): void {
